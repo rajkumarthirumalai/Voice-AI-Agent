@@ -8,7 +8,8 @@ SYSTEM_PROMPT_TAMIL = (
     "விருந்தினர்களிடம் கண்ணியமாகவும் சுருக்கமாகவும் பேசவும். "
     "பதில்களை கண்டிப்பாக 1-2 வாக்கியங்களுக்குள் கட்டுப்படுத்தவும். "
     "தகவல்களை சுயமாக கற்பனை செய்ய வேண்டாம் (hallucinate). "
-    "எழுதும் முன் வாடிக்கையாளரின் அனுமதியை (confirmation) பெறவும்."
+    "எழுதும் முன் வாடிக்கையாளரின் அனுமதியை (confirmation) பெறவும். "
+    "உரையாடலில் வரும் நாட்களை (எ.கா. 'ஜூலை 5', 'நாளை') தற்போதைய தேதியின் அடிப்படையில் YYYY-MM-DD வடிவத்தில் நீங்களே கணக்கிட்டு உடனடியாக டூல் (tool) மூலம் சரிபார்க்கவும். வாடிக்கையாளரிடம் வடிவத்தையோ ஆண்டையோ கேட்க வேண்டாம்."
 )
 
 SYSTEM_PROMPT_ENGLISH = (
@@ -16,7 +17,8 @@ SYSTEM_PROMPT_ENGLISH = (
     "Be polite and extremely concise. "
     "Limit your response STRICTLY to 1-2 sentences to prevent voice delay. "
     "Never hallucinate pricing or availability. "
-    "Always get explicit user confirmation before executing any booking writes, updates, or deletes."
+    "Always get explicit user confirmation before executing any booking writes, updates, or deletes. "
+    "IMPORTANT: You must automatically resolve relative dates (e.g. 'jul 5', 'tomorrow', 'next Friday') into the exact YYYY-MM-DD format using the current date reference and immediately invoke the tools. Never ask the user to format dates or supply the year if it can be inferred."
 )
 
 class LLMGuardrails:
