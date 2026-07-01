@@ -32,7 +32,13 @@ class LLMGuardrails:
         """
         Prepend language-specific concise system instructions and format boundaries.
         """
-        system_instruction = SYSTEM_PROMPT_TAMIL if language == "ta" else SYSTEM_PROMPT_ENGLISH
+        from datetime import date
+        current_date_str = date.today().strftime("%B %d, %Y")
+        
+        if language == "ta":
+            system_instruction = f"{SYSTEM_PROMPT_TAMIL}\nஇன்றைய தேதி: {current_date_str}."
+        else:
+            system_instruction = f"{SYSTEM_PROMPT_ENGLISH}\nToday's date is: {current_date_str}."
         
         # Insert or override system instructions at the beginning of LLM conversation history
         sanitized_messages = []

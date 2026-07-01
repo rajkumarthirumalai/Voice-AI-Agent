@@ -31,23 +31,16 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             data = await websocket.receive()
             
             if "bytes" in data:
-                audio_chunk = data["bytes"]
-                
-                # 2. Convert Audio Chunk to Text via Async STT Adapter
-                # STT uses stream-based or chunk-based transcription
-                transcript = await stt_adapter.transcribe_chunk(session_id, audio_chunk)
-                
-                if transcript and transcript.strip():
-                    logger.info(f"[{session_id}] Transcribed user input: {transcript}")
-                    
-                    # 3. Route to Core Agent Orchestration (with Tool calling & guardrails)
-                    agent_response = await agent_orchestrator.process_user_message(session, transcript)
-                    logger.info(f"[{session_id}] Agent response: {agent_response}")
-                    
-                    # 4. Synthesize Agent response text to Audio via TTS Adapter
-                    async for audio_out_chunk in tts_adapter.synthesize_stream(agent_response, language=session.language):
-                        # 5. Stream audio packets back to client
-                        await websocket.send_bytes(audio_out_chunk)
+                # Commented out for cost savings during text-based testing:
+                # audio_chunk = data["bytes"]
+                # transcript = await stt_adapter.transcribe_chunk(session_id, audio_chunk)
+                # if transcript and transcript.strip():
+                #     logger.info(f"[{session_id}] Transcribed user input: {transcript}")
+                #     agent_response = await agent_orchestrator.process_user_message(session, transcript)
+                #     logger.info(f"[{session_id}] Agent response: {agent_response}")
+                #     async for audio_out_chunk in tts_adapter.synthesize_stream(agent_response, language=session.language):
+                #         await websocket.send_bytes(audio_out_chunk)
+                pass
                         
             elif "text" in data:
                 import json
@@ -67,9 +60,10 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                     # 2. Send text response back to client (so the UI chat updates)
                     await websocket.send_json({"role": "assistant", "content": agent_response})
                     
-                    # 3. Stream synthetic TTS audio chunks back to client
-                    async for audio_out_chunk in tts_adapter.synthesize_stream(agent_response, language=session.language):
-                        await websocket.send_bytes(audio_out_chunk)
+                    # 3. Stream synthetic TTS audio chunks back to client (Commented out for cost savings during text testing)
+                    # async for audio_out_chunk in tts_adapter.synthesize_stream(agent_response, language=session.language):
+                    #     await websocket.send_bytes(audio_out_chunk)
+                    pass
                 
     except WebSocketDisconnect:
         logger.info(f"WebSocket disconnected for session: {session_id}")
