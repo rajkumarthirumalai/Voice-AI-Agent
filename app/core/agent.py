@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from google import genai
 from google.genai import types
 from app.core.session import CallSession
@@ -12,7 +12,7 @@ logger = logging.getLogger("voice_agent.agent")
 # Bounded Tool Helper Signatures for Gemini Schema Parsing
 # =====================================================================
 
-def check_availability(date: str, hall_name: str = None) -> str:
+def check_availability(date: str, hall_name: Optional[str] = None) -> str:
     """Check availability of halls on a given date. If hall_name is not provided, 
     returns a list of all available halls on that date.
     
