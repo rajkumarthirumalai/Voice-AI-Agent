@@ -39,3 +39,5 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str = Field(default="ta", description="Default fallback language ('ta' for Tamil, 'en' for English)")
 
 settings = Settings()
+# Force process reload to pick up new .env variables
+

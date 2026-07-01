@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.responses import HTMLResponse, RedirectResponse
+
 from app.config import settings
 from app.api.routes import router as api_router
 from app.api.websockets import router as ws_router
@@ -40,6 +42,15 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def root_app():
+    """
+    Serves the main Voice AI Agent console dashboard application.
+    """
+    with open("app/templates/index.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
 
 # Enable CORS for frontend and testing tools
 app.add_middleware(

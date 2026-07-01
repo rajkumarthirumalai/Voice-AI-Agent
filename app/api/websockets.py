@@ -50,8 +50,26 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                         await websocket.send_bytes(audio_out_chunk)
                         
             elif "text" in data:
-                # Fallback / Admin commands sent via text frames
-                logger.info(f"[{session_id}] Received text frame: {data['text']}")
+                import json
+                try:
+                    payload = json.loads(data["text"])
+                    text_content = payload.get("text", "")
+                except Exception:
+                    text_content = data["text"]
+                
+                if text_content and text_content.strip():
+                    logger.info(f"[{session_id}] Received text command: {text_content}")
+                    
+                    # 1. Process message with Agent Orchestrator
+                    agent_response = await agent_orchestrator.process_user_message(session, text_content)
+                    logger.info(f"[{session_id}] Agent response: {agent_response}")
+                    
+                    # 2. Send text response back to client (so the UI chat updates)
+                    await websocket.send_json({"role": "assistant", "content": agent_response})
+                    
+                    # 3. Stream synthetic TTS audio chunks back to client
+                    async for audio_out_chunk in tts_adapter.synthesize_stream(agent_response, language=session.language):
+                        await websocket.send_bytes(audio_out_chunk)
                 
     except WebSocketDisconnect:
         logger.info(f"WebSocket disconnected for session: {session_id}")

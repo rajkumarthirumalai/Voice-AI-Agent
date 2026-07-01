@@ -1,58 +1,113 @@
 import logging
-import uuid
+from datetime import datetime
 from typing import Dict, Any, Optional
+from sqlalchemy import select, and_
 from app.database.connection import db_manager
+from app.database.models import Hall, Booking
 
 logger = logging.getLogger("voice_agent.database.queries")
 
-async def check_hall_availability(hall_name: str, date: str) -> bool:
+async def check_hall_availability(hall_name: str, date_str: str) -> bool:
     """
-    Query the database to check if the specified hall is available on the given date.
+    Checks if a hall is available on a specific date.
+    SQL equivalent:
+    SELECT EXISTS (
+        SELECT 1 FROM bookings b
+        JOIN halls h ON b.hall_id = h.id
+        WHERE h.name ILIKE :hall_name AND b.date = :date_str AND b.status = 'confirmed'
+    );
     """
-    logger.info(f"Executing database query: Check availability for '{hall_name}' on date '{date}'")
+    logger.info(f"Checking availability for '{hall_name}' on '{date_str}'")
     
-    # In production:
-    # async with db_manager.session_maker() as session:
-    #     result = await session.execute(...)
-    #     return result.scalar() is None
-    
-    # Mocking behavior (available on odd days for test logic)
+    # Parse date
     try:
-        day = int(date.split("-")[-1])
-        return day % 2 != 0
-    except Exception:
-        return True
+        query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        logger.error(f"Invalid date format: {date_str}")
+        return False
+
+    async with db_manager.session_maker() as session:
+        # Select hall by case-insensitive name and check if a confirmed booking exists for that date
+        stmt = (
+            select(Booking)
+            .join(Hall)
+            .where(
+                and_(
+                    Hall.name.ilike(hall_name),
+                    Booking.date == query_date,
+                    Booking.status == "confirmed"
+                )
+            )
+        )
+        result = await session.execute(stmt)
+        booking = result.scalars().first()
+        
+        # If no booking exists, the hall is available
+        return booking is None
 
 
 async def get_hall_pricing(hall_name: str) -> Optional[Dict[str, Any]]:
     """
-    Query the database to retrieve tariff prices and taxes for a hall.
+    Fetches base price and tax details for a specific hall.
+    SQL equivalent:
+    SELECT base_price, tax_rate FROM halls WHERE name ILIKE :hall_name;
     """
-    logger.info(f"Executing database query: Get pricing details for '{hall_name}'")
+    logger.info(f"Fetching pricing details for hall: '{hall_name}'")
     
-    # Mock database records
-    halls_db = {
-        "main hall": {"base_price": 50000.0, "tax": 9000.0},
-        "mini hall": {"base_price": 25000.0, "tax": 4500.0},
-        "party hall": {"base_price": 15000.0, "tax": 2700.0}
-    }
-    
-    return halls_db.get(hall_name.lower(), {"base_price": 30000.0, "tax": 5400.0})
-
-
-async def create_booking(hall_name: str, date: str, customer_name: str, price: float) -> str:
-    """
-    Strictly bounded write operation. Inserts a new booking record into the database.
-    """
-    logger.info(f"Executing database transaction: Create booking for {customer_name} at {hall_name} on {date}")
-    
-    # In production:
-    # async with db_manager.session_maker() as session:
-    #     async with session.begin():
-    #         booking = Booking(hall_name=hall_name, date=date, customer_name=customer_name, price=price)
-    #         session.add(booking)
-    #     return booking.id
+    async with db_manager.session_maker() as session:
+        stmt = select(Hall).where(Hall.name.ilike(hall_name))
+        result = await session.execute(stmt)
+        hall = result.scalars().first()
         
-    # Generate mock booking confirmation code
-    booking_id = f"HB-{uuid.uuid4().hex[:6].upper()}"
-    return booking_id
+        if not hall:
+            logger.warning(f"Hall '{hall_name}' not found in database.")
+            return None
+            
+        # Calculate tax base
+        return {
+            "base_price": float(hall.base_price),
+            "tax": float(hall.base_price * (hall.tax_rate / 100))
+        }
+
+
+async def create_booking(hall_name: str, date_str: str, customer_name: str, price: float) -> str:
+    """
+    Inserts a confirmed booking into the bookings table.
+    SQL equivalent:
+    INSERT INTO bookings (hall_id, date, customer_name, total_price, status)
+    VALUES ((SELECT id FROM halls WHERE name ILIKE :hall_name), :date_str, :customer_name, :price, 'confirmed')
+    RETURNING id;
+    """
+    logger.info(f"Creating database transaction: booking for '{customer_name}' at '{hall_name}' on '{date_str}'")
+    
+    try:
+        query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        raise ValueError(f"Invalid date format: {date_str}")
+
+    async with db_manager.session_maker() as session:
+        async with session.begin():
+            # 1. Retrieve the hall ID
+            stmt = select(Hall).where(Hall.name.ilike(hall_name))
+            result = await session.execute(stmt)
+            hall = result.scalars().first()
+            
+            if not hall:
+                raise ValueError(f"Hall '{hall_name}' does not exist.")
+            
+            # 2. Instantiate and add booking model
+            new_booking = Booking(
+                hall_id=hall.id,
+                date=query_date,
+                customer_name=customer_name,
+                total_price=price,
+                status="confirmed"
+            )
+            session.add(new_booking)
+            
+            # Flush session to populate new_booking.id
+            await session.flush()
+            booking_id = str(new_booking.id)
+            
+            logger.info(f"Transaction complete. Staged booking committed with ID: {booking_id}")
+            return f"HB-{booking_id[:6].upper()}"

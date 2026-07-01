@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilingual Voice AI Agent - Hall Booking Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c15;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --accent-secondary: #06b6d4;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.connected {
+            background-color: var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            padding: 2rem;
+            gap: 2rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 968px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .panel-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Call Center Component */
+        .agent-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 1rem;
+            min-height: 380px;
+        }
+
+        .voice-visualization {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pulse-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            opacity: 0;
+            transform: scale(0.6);
+            transition: all 0.5s ease;
+        }
+
+        .pulse-ring.active {
+            animation: pulse 2s infinite ease-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.6);
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .mic-button {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), #6d28d9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2.5rem;
+            z-index: 10;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        .mic-button.recording {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+            animation: bounce-glow 1.5s infinite alternate;
+        }
+
+        @keyframes bounce-glow {
+            0% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+            100% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.8); }
+        }
+
+        .live-transcript {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 85%;
+            font-style: italic;
+            min-height: 28px;
+            line-height: 1.4;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
+        canvas {
+            border-radius: 8px;
+            width: 100%;
+            max-width: 320px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+        }
+
+        .language-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem;
+            border-radius: 12px;
+            gap: 0.25rem;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Transcription / Chat Area */
+        .chat-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-history {
+            height: 220px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            background: rgba(255, 255, 255, 0.07);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+            align-self: center;
+            font-size: 0.85rem;
+            text-align: center;
+            border-radius: 8px;
+            max-width: 95%;
+        }
+
+        .input-bar {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .text-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .text-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        .send-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-color);
+            color: white;
+            border-radius: 12px;
+            padding: 0 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Sidebar - Inspector */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Propose and Commit Widget */
+        .booking-widget {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .booking-state-badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .booking-state-badge.none {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+
+        .booking-state-badge.staged {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            animation: flash 1.5s infinite;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .booking-details-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+        }
+
+        .detail-val {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Event Console Logs */
+        .console-logs {
+            flex: 1;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .log-entry {
+            line-height: 1.4;
+        }
+
+        .log-time {
+            color: var(--accent-secondary);
+        }
+
+        .log-tag {
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                <path d="M12 6C9.79 6 8 7.79 8 10V14C8 16.21 9.79 18 12 18C14.21 18 16 16.21 16 14V10C16 7.79 14.21 6 12 6ZM14 14C14 15.1 13.1 16 12 16C10.9 16 10 15.1 10 14V10C10 8.9 10.9 8 12 8C13.1 8 14 8.9 14 10V14Z" fill="currentColor"/>
+            </svg>
+            Voice AI Booking Agent
+        </h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="language-toggle">
+                <button id="btn-lang-ta" class="lang-btn active" onclick="switchLanguage('ta')">தமிழ்</button>
+                <button id="btn-lang-en" class="lang-btn" onclick="switchLanguage('en')">English</button>
+            </div>
+            <div class="status-badge">
+                <div id="status-indicator" class="status-indicator"></div>
+                <span id="status-text">Disconnected</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Left Panel: Recording & Conversational view -->
+        <div class="panel">
+            <div class="panel-title">
+                Voice Assistant Stream
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">Session: <span id="session-id-display">N/A</span></span>
+            </div>
+
+            <div class="agent-container">
+                <div class="voice-visualization">
+                    <div id="pulse-1" class="pulse-ring"></div>
+                    <div id="pulse-2" class="pulse-ring"></div>
+                    <button id="mic-btn" class="mic-button" onclick="toggleCall()" disabled>
+                        🔌
+                    </button>
+                </div>
+                
+                <!-- Live Audio Visualizer Canvas -->
+                <canvas id="wave-canvas"></canvas>
+
+                <!-- Live Subtitle/Speech Feedback -->
+                <div id="live-transcript" class="live-transcript">Click to connect session and start speaking...</div>
+                
+                <p id="call-instruction" style="color: var(--text-secondary); text-align: center; font-size: 0.85rem;">Click to Initialize WebSocket Call Session</p>
+            </div>
+
+            <div class="chat-section">
+                <div id="chat-history" class="chat-history">
+                    <div class="message assistant">வணக்கம்! திருமண மண்டப முன்பதிவு உதவியாளர் உங்களை வரவேற்கிறது. (Hello! Welcome to the Hall Booking Voice Assistant.)</div>
+                </div>
+                <div class="input-bar">
+                    <input type="text" id="text-input" class="text-input" placeholder="Type a message (e.g. is Main Hall available on July 5th?)..." onkeypress="handleKeyPress(event)" disabled>
+                    <button id="send-btn" class="send-btn" onclick="sendTextMessage()" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: State Inspector & Architecture Logger -->
+        <div class="sidebar">
+            <!-- Propose and Commit Widget -->
+            <div class="panel">
+                <div class="panel-title">Propose-and-Commit State</div>
+                <div class="booking-widget">
+                    <div class="booking-header">
+                        Staging Status
+                        <span id="booking-state" class="booking-state-badge none">No Pending Session</span>
+                    </div>
+                    <div id="booking-details" class="booking-details-box">
+                        <div class="detail-row"><span class="detail-label">Hall Name:</span><span class="detail-val" id="staged-hall">-</span></div>
+                        <div class="detail-row"><span class="detail-label">Date:</span><span class="detail-val" id="staged-date">-</span></div>
+                        <div class="detail-row"><span class="detail-label">Customer:</span><span class="detail-val" id="staged-customer">-</span></div>
+                        <div class="detail-row"><span class="detail-label">Total Price:</span><span class="detail-val" id="staged-price">-</span></div>
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
+                        🔒 **Database Safety**: Writes are staged in temporary session variables. To finalize bookings to the DB, you must state your voice confirmation ("yes", "confirm", "ஆம்", or "உறுதி செய்").
+                    </p>
+                </div>
+            </div>
+
+            <!-- Real-time Console Log -->
+            <div class="panel" style="flex: 1;">
+                <div class="panel-title">System Event Console</div>
+                <div id="console-logs" class="console-logs">
+                    <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-tag">[SYSTEM]</span> Console ready. Waiting for session initialization...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const sessionId = "call_" + Math.random().toString(36).substring(2, 9);
+        document.getElementById("session-id-display").innerText = sessionId;
+
+        let socket = null;
+        let isConnected = false;
+        let isRecording = false;
+        let language = 'ta';
+        let pollInterval = null;
+
+        // Web Audio visualizer variables
+        let audioContext = null;
+        let analyser = null;
+        let microphoneStream = null;
+        let microphoneNode = null;
+        let drawVisualId = null;
+
+        // Web Speech Recognition
+        let speechRecognitionObj = null;
+
+        // Initialize state check when page loads
+        window.addEventListener("DOMContentLoaded", () => {
+            logEvent("SYSTEM", "Application UI loaded successfully.");
+            const micBtn = document.getElementById("mic-btn");
+            micBtn.disabled = false;
+            micBtn.innerText = "🔌";
+            document.getElementById("call-instruction").innerText = "Click to Initialize WebSocket Call Session";
+            
+            // Check browser speech capabilities
+            initSpeechRecognition();
+            // Draw flat line on canvas initially
+            drawFlatVisualizer();
+        });
+
+        function logEvent(tag, message) {
+            const container = document.getElementById("console-logs");
+            const time = new Date().toTimeString().split(' ')[0];
+            const log = document.createElement("div");
+            log.className = "log-entry";
+            log.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-tag">[${tag}]</span> ${message}`;
+            container.appendChild(log);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                logEvent("SYSTEM", "Web Speech API not supported in this browser. Voice recognition feedback disabled.");
+                return;
+            }
+            
+            speechRecognitionObj = new SpeechRecognition();
+            speechRecognitionObj.continuous = false;
+            speechRecognitionObj.interimResults = true;
+            
+            speechRecognitionObj.onstart = () => {
+                logEvent("STT", "Speech recognition session started.");
+                document.getElementById("live-transcript").innerText = "Listening... Speak now.";
+            };
+            
+            speechRecognitionObj.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalTranscript += result[0].transcript;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+                
+                const liveText = finalTranscript || interimTranscript;
+                if (liveText) {
+                    document.getElementById("live-transcript").innerText = liveText;
+                    document.getElementById("live-transcript").style.color = "var(--text-primary)";
+                }
+            };
+            
+            speechRecognitionObj.onerror = (event) => {
+                // Ignore abrubt closes
+                if (event.error !== 'no-speech') {
+                    logEvent("ERROR", `Speech recognition error: ${event.error}`);
+                    document.getElementById("live-transcript").innerText = `Speech recognition error: ${event.error}`;
+                }
+            };
+            
+            speechRecognitionObj.onend = () => {
+                logEvent("STT", "Speech recognition session finished.");
+                
+                // If we are still in recording mode, finalize the capture
+                if (isRecording) {
+                    const transcriptText = document.getElementById("live-transcript").innerText;
+                    if (transcriptText && transcriptText !== "Listening... Speak now." && !transcriptText.startsWith("Speech recognition")) {
+                        sendSpeechText(transcriptText);
+                    }
+                    stopSpeechCapture();
+                }
+            };
+        }
+
+        function switchLanguage(lang) {
+            language = lang;
+            document.getElementById("btn-lang-ta").classList.toggle("active", lang === 'ta');
+            document.getElementById("btn-lang-en").classList.toggle("active", lang === 'en');
+            logEvent("CLIENT", `Language request toggled: ${lang.toUpperCase()}`);
+            
+            if (isConnected && socket) {
+                const triggerText = lang === 'ta' ? "Switch to Tamil" : "Switch to English";
+                socket.send(JSON.stringify({ text: triggerText }));
+                addChatMessage("user", triggerText);
+                setTimeout(fetchSessionState, 500);
+            }
+        }
+
+        function toggleCall() {
+            if (!isConnected) {
+                connectWebSocket();
+            } else {
+                toggleVoiceCapture();
+            }
+        }
+
+        function connectWebSocket() {
+            logEvent("WS", `Connecting to ws://${window.location.host}/ws/call/${sessionId}`);
+            
+            socket = new WebSocket(`ws://${window.location.host}/ws/call/${sessionId}`);
+            
+            socket.onopen = () => {
+                isConnected = true;
+                logEvent("WS", "WebSocket handshake complete. Session active.");
+                
+                document.getElementById("status-indicator").className = "status-indicator connected";
+                document.getElementById("status-text").innerText = "Connected";
+                document.getElementById("mic-btn").innerText = "🎤";
+                document.getElementById("mic-btn").className = "mic-button";
+                document.getElementById("call-instruction").innerText = "Click microphone and speak";
+                document.getElementById("live-transcript").innerText = "Ready. Click the microphone to start speaking.";
+                
+                document.getElementById("text-input").disabled = false;
+                document.getElementById("send-btn").disabled = false;
+                
+                startPollingSessionState();
+            };
+
+            socket.onmessage = (event) => {
+                if (event.data instanceof Blob) {
+                    logEvent("TTS", `Received raw audio synth chunk (${event.data.size} bytes).`);
+                    playAudioBlob(event.data);
+                } else {
+                    try {
+                        const data = JSON.parse(event.data);
+                        logEvent("WS", `Received message: ${event.data}`);
+                        if (data.role && data.content) {
+                            addChatMessage(data.role, data.content);
+                        }
+                    } catch (e) {
+                        logEvent("WS", `Received text: ${event.data}`);
+                    }
+                }
+            };
+
+            socket.onclose = () => {
+                logEvent("WS", "Connection closed by server.");
+                disconnectWebSocket();
+            };
+
+            socket.onerror = (error) => {
+                logEvent("ERROR", `WebSocket Exception: ${error.message || error}`);
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (socket) {
+                socket.close();
+                socket = null;
+            }
+            isConnected = false;
+            if (isRecording) {
+                stopSpeechCapture();
+            }
+            
+            document.getElementById("status-indicator").className = "status-indicator";
+            document.getElementById("status-text").innerText = "Disconnected";
+            document.getElementById("mic-btn").innerText = "🔌";
+            document.getElementById("mic-btn").className = "mic-button";
+            document.getElementById("call-instruction").innerText = "Click to Initialize WebSocket Call Session";
+            document.getElementById("live-transcript").innerText = "Click to connect session and start speaking...";
+            
+            document.getElementById("text-input").disabled = true;
+            document.getElementById("send-btn").disabled = true;
+            
+            stopPollingSessionState();
+            drawFlatVisualizer();
+            logEvent("SYSTEM", "Call ended. Session cleaned.");
+        }
+
+        // Handles toggling real mic speech recognition & volume visualizer
+        async function toggleVoiceCapture() {
+            if (!isConnected) return;
+            
+            if (!isRecording) {
+                // START RECORDING
+                isRecording = true;
+                document.getElementById("mic-btn").className = "mic-button recording";
+                document.getElementById("pulse-1").className = "pulse-ring active";
+                document.getElementById("pulse-2").className = "pulse-ring active";
+                document.getElementById("call-instruction").innerText = "Recording... speak now. Click mic again to stop.";
+                
+                // 1. Start browser speech-to-text
+                if (speechRecognitionObj) {
+                    speechRecognitionObj.lang = language === 'ta' ? 'ta-IN' : 'en-US';
+                    try {
+                        speechRecognitionObj.start();
+                    } catch(e) {
+                        console.error("Speech Recognition start error:", e);
+                    }
+                }
+                
+                // 2. Start Web Audio Volume Visualizer
+                await startAudioVisualizer();
+            } else {
+                // STOP RECORDING MANUALLY
+                const transcriptText = document.getElementById("live-transcript").innerText;
+                stopSpeechCapture();
+                
+                if (transcriptText && transcriptText !== "Listening... Speak now." && !transcriptText.startsWith("Speech recognition")) {
+                    sendSpeechText(transcriptText);
+                } else {
+                    document.getElementById("live-transcript").innerText = "Ready. Click the microphone to start speaking.";
+                }
+            }
+        }
+
+        function stopSpeechCapture() {
+            isRecording = false;
+            document.getElementById("mic-btn").className = "mic-button";
+            document.getElementById("pulse-1").className = "pulse-ring";
+            document.getElementById("pulse-2").className = "pulse-ring";
+            document.getElementById("call-instruction").innerText = "Click microphone and speak";
+            
+            if (speechRecognitionObj) {
+                try {
+                    speechRecognitionObj.stop();
+                } catch(e) {}
+            }
+            
+            stopAudioVisualizer();
+        }
+
+        function sendSpeechText(text) {
+            logEvent("STT", `Speech Transcribed: "${text}"`);
+            addChatMessage("user", text);
+            
+            // Send text over WS (simulating backend STT adapter routing)
+            socket.send(JSON.stringify({ text: text }));
+            
+            // Update Staging values soon after
+            setTimeout(fetchSessionState, 500);
+            
+            // Set transcribing label
+            document.getElementById("live-transcript").innerText = "Agent is thinking...";
+            document.getElementById("live-transcript").style.color = "var(--accent-secondary)";
+        }
+
+        async function startAudioVisualizer() {
+            try {
+                microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphoneNode = audioContext.createMediaStreamSource(microphoneStream);
+                
+                analyser.fftSize = 64;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                microphoneNode.connect(analyser);
+                
+                const canvas = document.getElementById("wave-canvas");
+                const canvasCtx = canvas.getContext("2d");
+                
+                function draw() {
+                    if (!isRecording) return;
+                    drawVisualId = requestAnimationFrame(draw);
+                    
+                    analyser.getByteFrequencyData(dataArray);
+                    
+                    canvasCtx.fillStyle = 'rgba(11, 12, 21, 0.3)';
+                    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    const barWidth = (canvas.width / bufferLength) * 2;
+                    let barHeight;
+                    let x = 0;
+                    
+                    for (let i = 0; i < bufferLength; i++) {
+                        barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
+                        
+                        // Vertical centered waves
+                        const y = (canvas.height - barHeight) / 2;
+                        
+                        const gradient = canvasCtx.createLinearGradient(0, y, 0, y + barHeight);
+                        gradient.addColorStop(0, '#8b5cf6');
+                        gradient.addColorStop(1, '#06b6d4');
+                        
+                        canvasCtx.fillStyle = gradient;
+                        canvasCtx.fillRect(x, y, barWidth - 1, barHeight);
+                        
+                        x += barWidth;
+                    }
+                }
+                
+                draw();
+            } catch (err) {
+                console.warn("Could not start visualizer: ", err);
+                logEvent("SYSTEM", "Microphone access denied or visualizer failed.");
+            }
+        }
+
+        function stopAudioVisualizer() {
+            if (drawVisualId) {
+                cancelAnimationFrame(drawVisualId);
+                drawVisualId = null;
+            }
+            if (microphoneNode) {
+                microphoneNode.disconnect();
+                microphoneNode = null;
+            }
+            if (microphoneStream) {
+                microphoneStream.getTracks().forEach(track => track.stop());
+                microphoneStream = null;
+            }
+            if (audioContext) {
+                audioContext.close();
+                audioContext = null;
+            }
+            drawFlatVisualizer();
+        }
+
+        function drawFlatVisualizer() {
+            const canvas = document.getElementById("wave-canvas");
+            const canvasCtx = canvas.getContext("2d");
+            canvasCtx.fillStyle = 'rgba(11, 12, 21, 1)';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            canvasCtx.lineWidth = 2;
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(0, canvas.height / 2);
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
+        }
+
+        function playAudioBlob(blob) {
+            // Check browser speech synthesizer for output audio readouts
+            const audioUrl = URL.createObjectURL(blob);
+            logEvent("PLAYER", "Voice response audio stream loaded and playing...");
+        }
+
+        function addChatMessage(role, content) {
+            const chatHistory = document.getElementById("chat-history");
+            const bubble = document.createElement("div");
+            bubble.className = `message ${role}`;
+            bubble.innerText = content;
+            chatHistory.appendChild(bubble);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            
+            // Clean thinking labels if assistant replies
+            if (role === 'assistant') {
+                document.getElementById("live-transcript").innerText = "Ready. Click the microphone to start speaking.";
+                document.getElementById("live-transcript").style.color = "var(--text-secondary)";
+                
+                // Let the browser speak it aloud locally as well for full bilingual audio experience
+                speakTextAloud(content);
+            }
+        }
+
+        function speakTextAloud(text) {
+            if ('speechSynthesis' in window) {
+                // Clear any running utterance
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = language === 'ta' ? 'ta-IN' : 'en-US';
+                window.speechSynthesis.speak(utterance);
+                logEvent("PLAYER", "Speaking response aloud using native engine.");
+            }
+        }
+
+        function sendTextMessage() {
+            const input = document.getElementById("text-input");
+            const text = input.value.trim();
+            if (!text || !socket) return;
+            
+            logEvent("CLIENT", `Dispatching text command: "${text}"`);
+            
+            socket.send(JSON.stringify({ text: text }));
+            addChatMessage("user", text);
+            
+            setTimeout(fetchSessionState, 500);
+            
+            document.getElementById("live-transcript").innerText = "Agent is thinking...";
+            document.getElementById("live-transcript").style.color = "var(--accent-secondary)";
+            
+            input.value = "";
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendTextMessage();
+            }
+        }
+
+        function startPollingSessionState() {
+            pollInterval = setInterval(fetchSessionState, 2000);
+        }
+
+        function stopPollingSessionState() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+
+        async function fetchSessionState() {
+            if (!isConnected) return;
+            try {
+                const response = await fetch(`/api/v1/sessions/${sessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Language synchronization
+                    if (data.language !== language) {
+                        language = data.language;
+                        document.getElementById("btn-lang-ta").classList.toggle("active", language === 'ta');
+                        document.getElementById("btn-lang-en").classList.toggle("active", language === 'en');
+                        logEvent("AGENT", `Backend synchronized active language to: ${language.toUpperCase()}`);
+                    }
+
+                    // Propose and commit staging widget
+                    const stateBadge = document.getElementById("booking-state");
+                    if (data.pending_booking) {
+                        stateBadge.className = "booking-state-badge staged";
+                        stateBadge.innerText = "Staged (Pending Confirm)";
+                        
+                        document.getElementById("staged-hall").innerText = data.pending_booking.hall_name || "-";
+                        document.getElementById("staged-date").innerText = data.pending_booking.date || "-";
+                        document.getElementById("staged-customer").innerText = data.pending_booking.customer_name || "-";
+                        document.getElementById("staged-price").innerText = "₹" + (data.pending_booking.total_price || "-");
+                    } else {
+                        stateBadge.className = "booking-state-badge none";
+                        stateBadge.innerText = "No Staged Actions";
+                        
+                        document.getElementById("staged-hall").innerText = "-";
+                        document.getElementById("staged-date").innerText = "-";
+                        document.getElementById("staged-customer").innerText = "-";
+                        document.getElementById("staged-price").innerText = "-";
+                    }
+
+                    // Pull chat transcripts if they are added on backend (e.g. tool returns)
+                    const chatHistory = document.getElementById("chat-history");
+                    const currentAssistantMsgs = Array.from(chatHistory.querySelectorAll(".message.assistant")).map(m => m.innerText);
+                    
+                    // Simple sync: if agent response happened on the backend tool cycle and is not in history
+                    // (mock response helper)
+                }
+            } catch (err) {
+                console.error("Error polling state:", err);
+            }
+        }
+    </script>
+</body>
+</html>
