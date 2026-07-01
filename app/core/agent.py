@@ -182,3 +182,6 @@ class AgentOrchestrator:
 
 # Global Singleton Agent Orchestrator
 agent_orchestrator = AgentOrchestrator()
+
+# Import tools package to execute registration decorators
+import app.tools
