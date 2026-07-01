@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilingual Voice AI Agent - Hall Booking Console</title>
+    <title>Agentic Booking Chatbot - Console</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,7 +13,6 @@
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
             --accent-primary: #8b5cf6;
-            --accent-glow: rgba(139, 92, 246, 0.4);
             --accent-secondary: #06b6d4;
             --success-color: #10b981;
             --warning-color: #f59e0b;
@@ -29,8 +28,8 @@
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 80%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+                radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -133,109 +132,6 @@
             align-items: center;
         }
 
-        /* Call Center Component */
-        .agent-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            gap: 1rem;
-            min-height: 380px;
-        }
-
-        .voice-visualization {
-            width: 180px;
-            height: 180px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .pulse-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: var(--accent-glow);
-            opacity: 0;
-            transform: scale(0.6);
-            transition: all 0.5s ease;
-        }
-
-        .pulse-ring.active {
-            animation: pulse 2s infinite ease-out;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(0.6);
-                opacity: 0.6;
-            }
-            100% {
-                transform: scale(1.3);
-                opacity: 0;
-            }
-        }
-
-        .mic-button {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-primary), #6d28d9);
-            border: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 2.5rem;
-            z-index: 10;
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-        }
-
-        .mic-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.6);
-        }
-
-        .mic-button.recording {
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
-            animation: bounce-glow 1.5s infinite alternate;
-        }
-
-        @keyframes bounce-glow {
-            0% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-            100% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.8); }
-        }
-
-        .live-transcript {
-            font-size: 1.05rem;
-            color: var(--text-secondary);
-            text-align: center;
-            max-width: 85%;
-            font-style: italic;
-            min-height: 28px;
-            line-height: 1.4;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 8px;
-            border: 1px dashed rgba(255, 255, 255, 0.05);
-        }
-
-        canvas {
-            border-radius: 8px;
-            width: 100%;
-            max-width: 320px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.15);
-            border: 1px solid var(--border-color);
-        }
-
         .language-toggle {
             display: flex;
             background: rgba(255, 255, 255, 0.05);
@@ -262,33 +158,34 @@
             color: white;
         }
 
-        /* Transcription / Chat Area */
+        /* Chatbot Layout */
         .chat-section {
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 1.2rem;
+        }
+
+        .chat-history {
+            height: 480px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
 
-        .chat-history {
-            height: 220px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
         .message {
-            max-width: 80%;
-            padding: 0.8rem 1rem;
-            border-radius: 16px;
+            max-width: 75%;
+            padding: 0.9rem 1.2rem;
+            border-radius: 18px;
             font-size: 0.95rem;
-            line-height: 1.4;
-            animation: fadeIn 0.3s ease;
+            line-height: 1.5;
+            animation: fadeIn 0.25s ease;
         }
 
         @keyframes fadeIn {
@@ -310,14 +207,42 @@
         }
 
         .message.system {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.2);
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.15);
             color: var(--warning-color);
             align-self: center;
             font-size: 0.85rem;
             text-align: center;
             border-radius: 8px;
             max-width: 95%;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1.2rem;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            display: none;
+            gap: 0.3rem;
+            align-items: center;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
         }
 
         .input-bar {
@@ -330,11 +255,12 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 0.8rem 1rem;
+            padding: 0.9rem 1.2rem;
             color: white;
             font-family: inherit;
             outline: none;
             transition: all 0.2s ease;
+            font-size: 0.95rem;
         }
 
         .text-input:focus {
@@ -343,19 +269,18 @@
         }
 
         .send-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--border-color);
+            background: var(--accent-primary);
+            border: none;
             color: white;
             border-radius: 12px;
-            padding: 0 1.2rem;
+            padding: 0 1.5rem;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s ease;
         }
 
         .send-btn:hover {
-            background: var(--accent-primary);
-            border-color: var(--accent-primary);
+            opacity: 0.9;
         }
 
         /* Sidebar - Inspector */
@@ -475,7 +400,7 @@
                 <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
                 <path d="M12 6C9.79 6 8 7.79 8 10V14C8 16.21 9.79 18 12 18C14.21 18 16 16.21 16 14V10C16 7.79 14.21 6 12 6ZM14 14C14 15.1 13.1 16 12 16C10.9 16 10 15.1 10 14V10C10 8.9 10.9 8 12 8C13.1 8 14 8.9 14 10V14Z" fill="currentColor"/>
             </svg>
-            Voice AI Booking Agent
+            Agentic Booking Chatbot
         </h1>
         <div style="display: flex; gap: 1rem; align-items: center;">
             <div class="language-toggle">
@@ -490,38 +415,28 @@
     </header>
 
     <main>
-        <!-- Left Panel: Recording & Conversational view -->
+        <!-- Left Panel: Chat Interface -->
         <div class="panel">
             <div class="panel-title">
-                Voice Assistant Stream
+                Conversational Portal
                 <span style="font-size: 0.8rem; color: var(--text-secondary);">Session: <span id="session-id-display">N/A</span></span>
-            </div>
-
-            <div class="agent-container">
-                <div class="voice-visualization">
-                    <div id="pulse-1" class="pulse-ring"></div>
-                    <div id="pulse-2" class="pulse-ring"></div>
-                    <button id="mic-btn" class="mic-button" onclick="toggleCall()" disabled>
-                        🔌
-                    </button>
-                </div>
-                
-                <!-- Live Audio Visualizer Canvas -->
-                <canvas id="wave-canvas"></canvas>
-
-                <!-- Live Subtitle/Speech Feedback -->
-                <div id="live-transcript" class="live-transcript">Click to connect session and start speaking...</div>
-                
-                <p id="call-instruction" style="color: var(--text-secondary); text-align: center; font-size: 0.85rem;">Click to Initialize WebSocket Call Session</p>
             </div>
 
             <div class="chat-section">
                 <div id="chat-history" class="chat-history">
                     <div class="message assistant">வணக்கம்! திருமண மண்டப முன்பதிவு உதவியாளர் உங்களை வரவேற்கிறது. (Hello! Welcome to the Hall Booking Voice Assistant.)</div>
+                    
+                    <!-- Typing Indicator -->
+                    <div id="typing" class="typing-indicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
                 </div>
+                
                 <div class="input-bar">
-                    <input type="text" id="text-input" class="text-input" placeholder="Type a message (e.g. is Main Hall available on July 5th?)..." onkeypress="handleKeyPress(event)" disabled>
-                    <button id="send-btn" class="send-btn" onclick="sendTextMessage()" disabled>Send</button>
+                    <input type="text" id="text-input" class="text-input" placeholder="Type a query (e.g. is Main Hall available on July 5th?)..." onkeypress="handleKeyPress(event)">
+                    <button id="send-btn" class="send-btn" onclick="sendTextMessage()">Send</button>
                 </div>
             </div>
         </div>
@@ -552,7 +467,7 @@
             <div class="panel" style="flex: 1;">
                 <div class="panel-title">System Event Console</div>
                 <div id="console-logs" class="console-logs">
-                    <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-tag">[SYSTEM]</span> Console ready. Waiting for session initialization...</div>
+                    <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-tag">[SYSTEM]</span> Console ready. Initializing auto-connection...</div>
                 </div>
             </div>
         </div>
@@ -564,32 +479,13 @@
 
         let socket = null;
         let isConnected = false;
-        let isRecording = false;
         let language = 'ta';
         let pollInterval = null;
 
-        // Web Audio visualizer variables
-        let audioContext = null;
-        let analyser = null;
-        let microphoneStream = null;
-        let microphoneNode = null;
-        let drawVisualId = null;
-
-        // Web Speech Recognition
-        let speechRecognitionObj = null;
-
-        // Initialize state check when page loads
+        // Auto-connect on page load
         window.addEventListener("DOMContentLoaded", () => {
-            logEvent("SYSTEM", "Application UI loaded successfully.");
-            const micBtn = document.getElementById("mic-btn");
-            micBtn.disabled = false;
-            micBtn.innerText = "🔌";
-            document.getElementById("call-instruction").innerText = "Click to Initialize WebSocket Call Session";
-            
-            // Check browser speech capabilities
-            initSpeechRecognition();
-            // Draw flat line on canvas initially
-            drawFlatVisualizer();
+            logEvent("SYSTEM", "UI ready. Establishing auto-connection...");
+            connectWebSocket();
         });
 
         function logEvent(tag, message) {
@@ -600,64 +496,6 @@
             log.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-tag">[${tag}]</span> ${message}`;
             container.appendChild(log);
             container.scrollTop = container.scrollHeight;
-        }
-
-        function initSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                logEvent("SYSTEM", "Web Speech API not supported in this browser. Voice recognition feedback disabled.");
-                return;
-            }
-            
-            speechRecognitionObj = new SpeechRecognition();
-            speechRecognitionObj.continuous = false;
-            speechRecognitionObj.interimResults = true;
-            
-            speechRecognitionObj.onstart = () => {
-                logEvent("STT", "Speech recognition session started.");
-                document.getElementById("live-transcript").innerText = "Listening... Speak now.";
-            };
-            
-            speechRecognitionObj.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-                
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    const result = event.results[i];
-                    if (result.isFinal) {
-                        finalTranscript += result[0].transcript;
-                    } else {
-                        interimTranscript += result[0].transcript;
-                    }
-                }
-                
-                const liveText = finalTranscript || interimTranscript;
-                if (liveText) {
-                    document.getElementById("live-transcript").innerText = liveText;
-                    document.getElementById("live-transcript").style.color = "var(--text-primary)";
-                }
-            };
-            
-            speechRecognitionObj.onerror = (event) => {
-                // Ignore abrubt closes
-                if (event.error !== 'no-speech') {
-                    logEvent("ERROR", `Speech recognition error: ${event.error}`);
-                    document.getElementById("live-transcript").innerText = `Speech recognition error: ${event.error}`;
-                }
-            };
-            
-            speechRecognitionObj.onend = () => {
-                logEvent("STT", "Speech recognition session finished.");
-                
-                // If we are still in recording mode, finalize the capture
-                if (isRecording) {
-                    const transcriptText = document.getElementById("live-transcript").innerText;
-                    if (transcriptText && transcriptText !== "Listening... Speak now." && !transcriptText.startsWith("Speech recognition")) {
-                        sendSpeechText(transcriptText);
-                    }
-                    stopSpeechCapture();
-                }
-            };
         }
 
         function switchLanguage(lang) {
@@ -674,14 +512,6 @@
             }
         }
 
-        function toggleCall() {
-            if (!isConnected) {
-                connectWebSocket();
-            } else {
-                toggleVoiceCapture();
-            }
-        }
-
         function connectWebSocket() {
             logEvent("WS", `Connecting to ws://${window.location.host}/ws/call/${sessionId}`);
             
@@ -689,277 +519,70 @@
             
             socket.onopen = () => {
                 isConnected = true;
-                logEvent("WS", "WebSocket handshake complete. Session active.");
+                logEvent("WS", "WebSocket connection active.");
                 
                 document.getElementById("status-indicator").className = "status-indicator connected";
                 document.getElementById("status-text").innerText = "Connected";
-                document.getElementById("mic-btn").innerText = "🎤";
-                document.getElementById("mic-btn").className = "mic-button";
-                document.getElementById("call-instruction").innerText = "Click microphone and speak";
-                document.getElementById("live-transcript").innerText = "Ready. Click the microphone to start speaking.";
-                
-                document.getElementById("text-input").disabled = false;
-                document.getElementById("send-btn").disabled = false;
                 
                 startPollingSessionState();
             };
 
             socket.onmessage = (event) => {
-                if (event.data instanceof Blob) {
-                    logEvent("TTS", `Received raw audio synth chunk (${event.data.size} bytes).`);
-                    playAudioBlob(event.data);
-                } else {
-                    try {
-                        const data = JSON.parse(event.data);
-                        logEvent("WS", `Received message: ${event.data}`);
-                        if (data.role && data.content) {
-                            addChatMessage(data.role, data.content);
-                        }
-                    } catch (e) {
-                        logEvent("WS", `Received text: ${event.data}`);
+                // Hide typing loader
+                document.getElementById("typing").style.display = "none";
+                
+                try {
+                    const data = JSON.parse(event.data);
+                    logEvent("WS", `Received payload: ${event.data}`);
+                    if (data.role && data.content) {
+                        addChatMessage(data.role, data.content);
                     }
+                } catch (e) {
+                    logEvent("WS", `Received raw: ${event.data}`);
                 }
             };
 
             socket.onclose = () => {
                 logEvent("WS", "Connection closed by server.");
-                disconnectWebSocket();
+                document.getElementById("status-indicator").className = "status-indicator";
+                document.getElementById("status-text").innerText = "Disconnected";
+                stopPollingSessionState();
             };
 
             socket.onerror = (error) => {
-                logEvent("ERROR", `WebSocket Exception: ${error.message || error}`);
+                logEvent("ERROR", `WebSocket error: ${error.message || error}`);
             };
-        }
-
-        function disconnectWebSocket() {
-            if (socket) {
-                socket.close();
-                socket = null;
-            }
-            isConnected = false;
-            if (isRecording) {
-                stopSpeechCapture();
-            }
-            
-            document.getElementById("status-indicator").className = "status-indicator";
-            document.getElementById("status-text").innerText = "Disconnected";
-            document.getElementById("mic-btn").innerText = "🔌";
-            document.getElementById("mic-btn").className = "mic-button";
-            document.getElementById("call-instruction").innerText = "Click to Initialize WebSocket Call Session";
-            document.getElementById("live-transcript").innerText = "Click to connect session and start speaking...";
-            
-            document.getElementById("text-input").disabled = true;
-            document.getElementById("send-btn").disabled = true;
-            
-            stopPollingSessionState();
-            drawFlatVisualizer();
-            logEvent("SYSTEM", "Call ended. Session cleaned.");
-        }
-
-        // Handles toggling real mic speech recognition & volume visualizer
-        async function toggleVoiceCapture() {
-            if (!isConnected) return;
-            
-            if (!isRecording) {
-                // START RECORDING
-                isRecording = true;
-                document.getElementById("mic-btn").className = "mic-button recording";
-                document.getElementById("pulse-1").className = "pulse-ring active";
-                document.getElementById("pulse-2").className = "pulse-ring active";
-                document.getElementById("call-instruction").innerText = "Recording... speak now. Click mic again to stop.";
-                
-                // 1. Start browser speech-to-text
-                if (speechRecognitionObj) {
-                    speechRecognitionObj.lang = language === 'ta' ? 'ta-IN' : 'en-US';
-                    try {
-                        speechRecognitionObj.start();
-                    } catch(e) {
-                        console.error("Speech Recognition start error:", e);
-                    }
-                }
-                
-                // 2. Start Web Audio Volume Visualizer
-                await startAudioVisualizer();
-            } else {
-                // STOP RECORDING MANUALLY
-                const transcriptText = document.getElementById("live-transcript").innerText;
-                stopSpeechCapture();
-                
-                if (transcriptText && transcriptText !== "Listening... Speak now." && !transcriptText.startsWith("Speech recognition")) {
-                    sendSpeechText(transcriptText);
-                } else {
-                    document.getElementById("live-transcript").innerText = "Ready. Click the microphone to start speaking.";
-                }
-            }
-        }
-
-        function stopSpeechCapture() {
-            isRecording = false;
-            document.getElementById("mic-btn").className = "mic-button";
-            document.getElementById("pulse-1").className = "pulse-ring";
-            document.getElementById("pulse-2").className = "pulse-ring";
-            document.getElementById("call-instruction").innerText = "Click microphone and speak";
-            
-            if (speechRecognitionObj) {
-                try {
-                    speechRecognitionObj.stop();
-                } catch(e) {}
-            }
-            
-            stopAudioVisualizer();
-        }
-
-        function sendSpeechText(text) {
-            logEvent("STT", `Speech Transcribed: "${text}"`);
-            addChatMessage("user", text);
-            
-            // Send text over WS (simulating backend STT adapter routing)
-            socket.send(JSON.stringify({ text: text }));
-            
-            // Update Staging values soon after
-            setTimeout(fetchSessionState, 500);
-            
-            // Set transcribing label
-            document.getElementById("live-transcript").innerText = "Agent is thinking...";
-            document.getElementById("live-transcript").style.color = "var(--accent-secondary)";
-        }
-
-        async function startAudioVisualizer() {
-            try {
-                microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                microphoneNode = audioContext.createMediaStreamSource(microphoneStream);
-                
-                analyser.fftSize = 64;
-                const bufferLength = analyser.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
-                
-                microphoneNode.connect(analyser);
-                
-                const canvas = document.getElementById("wave-canvas");
-                const canvasCtx = canvas.getContext("2d");
-                
-                function draw() {
-                    if (!isRecording) return;
-                    drawVisualId = requestAnimationFrame(draw);
-                    
-                    analyser.getByteFrequencyData(dataArray);
-                    
-                    canvasCtx.fillStyle = 'rgba(11, 12, 21, 0.3)';
-                    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    const barWidth = (canvas.width / bufferLength) * 2;
-                    let barHeight;
-                    let x = 0;
-                    
-                    for (let i = 0; i < bufferLength; i++) {
-                        barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
-                        
-                        // Vertical centered waves
-                        const y = (canvas.height - barHeight) / 2;
-                        
-                        const gradient = canvasCtx.createLinearGradient(0, y, 0, y + barHeight);
-                        gradient.addColorStop(0, '#8b5cf6');
-                        gradient.addColorStop(1, '#06b6d4');
-                        
-                        canvasCtx.fillStyle = gradient;
-                        canvasCtx.fillRect(x, y, barWidth - 1, barHeight);
-                        
-                        x += barWidth;
-                    }
-                }
-                
-                draw();
-            } catch (err) {
-                console.warn("Could not start visualizer: ", err);
-                logEvent("SYSTEM", "Microphone access denied or visualizer failed.");
-            }
-        }
-
-        function stopAudioVisualizer() {
-            if (drawVisualId) {
-                cancelAnimationFrame(drawVisualId);
-                drawVisualId = null;
-            }
-            if (microphoneNode) {
-                microphoneNode.disconnect();
-                microphoneNode = null;
-            }
-            if (microphoneStream) {
-                microphoneStream.getTracks().forEach(track => track.stop());
-                microphoneStream = null;
-            }
-            if (audioContext) {
-                audioContext.close();
-                audioContext = null;
-            }
-            drawFlatVisualizer();
-        }
-
-        function drawFlatVisualizer() {
-            const canvas = document.getElementById("wave-canvas");
-            const canvasCtx = canvas.getContext("2d");
-            canvasCtx.fillStyle = 'rgba(11, 12, 21, 1)';
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-            canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-            canvasCtx.lineWidth = 2;
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(0, canvas.height / 2);
-            canvasCtx.lineTo(canvas.width, canvas.height / 2);
-            canvasCtx.stroke();
-        }
-
-        function playAudioBlob(blob) {
-            // Check browser speech synthesizer for output audio readouts
-            const audioUrl = URL.createObjectURL(blob);
-            logEvent("PLAYER", "Voice response audio stream loaded and playing...");
         }
 
         function addChatMessage(role, content) {
             const chatHistory = document.getElementById("chat-history");
+            const typing = document.getElementById("typing");
+            
             const bubble = document.createElement("div");
             bubble.className = `message ${role}`;
             bubble.innerText = content;
-            chatHistory.appendChild(bubble);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
             
-            // Clean thinking labels if assistant replies
-            if (role === 'assistant') {
-                document.getElementById("live-transcript").innerText = "Ready. Click the microphone to start speaking.";
-                document.getElementById("live-transcript").style.color = "var(--text-secondary)";
-                
-                // Let the browser speak it aloud locally as well for full bilingual audio experience
-                speakTextAloud(content);
-            }
-        }
-
-        function speakTextAloud(text) {
-            if ('speechSynthesis' in window) {
-                // Clear any running utterance
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = language === 'ta' ? 'ta-IN' : 'en-US';
-                window.speechSynthesis.speak(utterance);
-                logEvent("PLAYER", "Speaking response aloud using native engine.");
-            }
+            // Insert before typing loader
+            chatHistory.insertBefore(bubble, typing);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
         }
 
         function sendTextMessage() {
             const input = document.getElementById("text-input");
             const text = input.value.trim();
-            if (!text || !socket) return;
+            if (!text || !socket || !isConnected) return;
             
             logEvent("CLIENT", `Dispatching text command: "${text}"`);
             
             socket.send(JSON.stringify({ text: text }));
             addChatMessage("user", text);
             
-            setTimeout(fetchSessionState, 500);
+            // Show typing indicator
+            document.getElementById("typing").style.display = "flex";
+            const chatHistory = document.getElementById("chat-history");
+            chatHistory.scrollTop = chatHistory.scrollHeight;
             
-            document.getElementById("live-transcript").innerText = "Agent is thinking...";
-            document.getElementById("live-transcript").style.color = "var(--accent-secondary)";
+            setTimeout(fetchSessionState, 500);
             
             input.value = "";
         }
@@ -1015,13 +638,6 @@
                         document.getElementById("staged-customer").innerText = "-";
                         document.getElementById("staged-price").innerText = "-";
                     }
-
-                    // Pull chat transcripts if they are added on backend (e.g. tool returns)
-                    const chatHistory = document.getElementById("chat-history");
-                    const currentAssistantMsgs = Array.from(chatHistory.querySelectorAll(".message.assistant")).map(m => m.innerText);
-                    
-                    // Simple sync: if agent response happened on the backend tool cycle and is not in history
-                    // (mock response helper)
                 }
             } catch (err) {
                 console.error("Error polling state:", err);
