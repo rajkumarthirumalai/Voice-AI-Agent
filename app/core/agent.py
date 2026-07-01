@@ -12,12 +12,13 @@ logger = logging.getLogger("voice_agent.agent")
 # Bounded Tool Helper Signatures for Gemini Schema Parsing
 # =====================================================================
 
-def check_availability(date: str, hall_name: str) -> str:
-    """Check if a specific hall is available for booking on a given date.
+def check_availability(date: str, hall_name: str = None) -> str:
+    """Check availability of halls on a given date. If hall_name is not provided, 
+    returns a list of all available halls on that date.
     
     Args:
         date: The date to check in YYYY-MM-DD format.
-        hall_name: The name of the hall to check (e.g., Main Hall).
+        hall_name: Optional name of a specific hall to check (e.g., Main Hall).
     """
     pass
 
@@ -74,13 +75,15 @@ class AgentOrchestrator:
         Main interface to process incoming user transcripts.
         """
         # 1. Bilingual language detection/switch helper
-        lower_text = user_text.lower()
-        if "speak in english" in lower_text or "ஆங்கிலம்" in lower_text:
-            session.language = "en"
-            logger.info(f"Session {session.session_id} switched language to English")
-        elif "tamil" in lower_text or "தமிழில் பேசு" in lower_text:
+        # Detect if input contains Tamil characters (Unicode block: \u0b80 to \u0bff)
+        has_tamil = any('\u0b80' <= char <= '\u0bff' for char in user_text)
+        if has_tamil:
             session.language = "ta"
-            logger.info(f"Session {session.session_id} switched language to Tamil")
+            logger.info(f"Session {session.session_id} dynamically switched language to Tamil")
+        else:
+            # If the user speaks in English / Latin script, automatically switch to English
+            session.language = "en"
+            logger.info(f"Session {session.session_id} dynamically switched language to English")
 
         # 2. Add message to session history
         session.add_to_history("user", user_text)

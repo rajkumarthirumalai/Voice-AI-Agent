@@ -111,3 +111,29 @@ async def create_booking(hall_name: str, date_str: str, customer_name: str, pric
             
             logger.info(f"Transaction complete. Staged booking committed with ID: {booking_id}")
             return f"HB-{booking_id[:6].upper()}"
+
+
+async def get_available_halls(date_str: str) -> list[str]:
+    """
+    Returns a list of all hall names that are available (not booked) on a given date.
+    """
+    logger.info(f"Executing database query: Get all available halls on date '{date_str}'")
+    try:
+        query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        logger.error(f"Invalid date format: {date_str}")
+        return []
+
+    async with db_manager.session_maker() as session:
+        # Subquery to select all booked hall IDs for the date
+        booked_subquery = select(Booking.hall_id).where(
+            and_(
+                Booking.date == query_date,
+                Booking.status == "confirmed"
+            )
+        )
+        
+        # Query halls whose IDs are not in the booked subquery
+        stmt = select(Hall.name).where(Hall.id.not_in(booked_subquery))
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
